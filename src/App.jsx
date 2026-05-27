@@ -69,9 +69,12 @@ function App() {
     canvasContainerRef.current.appendChild(canvasElement);
 
     // Initialize Fabric Canvas
+    const tWidth = selectedTemplate.width || 1000;
+    const tHeight = selectedTemplate.height || 700;
+
     const canvas = new fabric.Canvas(canvasElement, {
-      width: 1000,
-      height: 700,
+      width: tWidth,
+      height: tHeight,
       backgroundColor: "#ffffff",
       preserveObjectStacking: true,
     });
@@ -93,8 +96,9 @@ function App() {
             selectable: false, 
             evented: false 
           });
-          img.scaleToWidth(canvas.width);
-          img.scaleToHeight(canvas.height);
+          // Since the canvas is now sized to match the actual image, we size it precisely
+          img.scaleToWidth(tWidth);
+          img.scaleToHeight(tHeight);
           canvas.add(img);
           img.sendToBack();
           canvas.renderAll();
@@ -115,6 +119,7 @@ function App() {
               fontFamily: el.font_family || 'Arial',
               fill: el.color || '#000000',
               textAlign: el.alignment || 'left',
+              originX: el.alignment === "center" ? "center" : el.alignment === "right" ? "right" : "left",
               // Force dimensions to be fully baked, ignoring previous scale
               scaleX: 1,
               scaleY: 1
@@ -131,10 +136,10 @@ function App() {
       if (!wrapperRef.current || !canvas) return;
       const { clientWidth, clientHeight } = wrapperRef.current;
       // Allow padding
-      const scale = Math.min((clientWidth - 40) / 1000, (clientHeight - 40) / 700);
+      const scale = Math.min((clientWidth - 40) / tWidth, (clientHeight - 40) / tHeight);
       const finalScale = Math.max(0.1, scale);
       
-      canvas.setDimensions({ width: 1000 * finalScale, height: 700 * finalScale });
+      canvas.setDimensions({ width: tWidth * finalScale, height: tHeight * finalScale });
       canvas.setZoom(finalScale);
     };
 
@@ -244,6 +249,7 @@ function App() {
           fontFamily: el.font_family,
           fill: el.color,
           textAlign: el.alignment,
+          originX: el.alignment === "center" ? "center" : el.alignment === "right" ? "right" : "left",
         });
         text.set('id', el.id);
         fabricCanvas.add(text);
@@ -260,6 +266,9 @@ function App() {
     
     // Apply locally
     activeObject.set(key, value);
+    if (key === 'textAlign') {
+      activeObject.set({ originX: value === 'center' ? 'center' : value === 'right' ? 'right' : 'left' });
+    }
     // If text modified, handle bounding boxes
     if (key === 'text') activeObject.setCoords();
     fabricCanvas.renderAll();
@@ -272,6 +281,7 @@ function App() {
     if (key === 'fontSize') payload.font_size = value;
     if (key === 'fontFamily') payload.font_family = value;
     if (key === 'text') payload.content = value;
+    if (key === 'textAlign') payload.alignment = value;
 
     // Debounce the fetch request to prevent database locks (SQLite) when typing fast
     clearTimeout(saveTimeoutRef.current);
@@ -456,6 +466,18 @@ function App() {
                         <option value="Courier New">Courier New</option>
                         <option value="Georgia">Georgia</option>
                         <option value="Verdana">Verdana</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold mb-1 text-gray-700">Alignment</label>
+                      <select 
+                        value={activeObject.textAlign} 
+                        onChange={(e) => handleUpdateActiveObject('textAlign', e.target.value)}
+                        className="w-full border border-gray-300 rounded p-2 text-sm focus:border-blue-500 focus:outline-none"
+                      >
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
                       </select>
                     </div>
                     <div className="pt-4 border-t border-gray-100 text-xs text-gray-400">
