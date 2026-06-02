@@ -1,6 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
-import { ArrowRight, MousePointer2, Sparkles, FileSpreadsheet } from "lucide-react";
+import { Box, Sparkles, MoveRight, Layers, FileImage } from "lucide-react";
+import { isLoggedIn } from "@/lib/auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,105 +19,137 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
+  beforeLoad: () => {
+    if (typeof window !== "undefined" && isLoggedIn()) {
+      throw redirect({ to: "/dashboard" });
+    }
+  },
   component: Landing,
 });
 
 function Landing() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
       <Header />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid opacity-40" aria-hidden />
-        <div className="absolute inset-0 bg-radial-glow" aria-hidden />
-        <div className="relative mx-auto max-w-6xl px-6 py-28 sm:py-36">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface/60 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            Pixel-aligned certificate generation
-          </div>
-          <h1 className="mt-6 max-w-3xl font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl">
-            Design once.
-            <br />
-            <span className="bg-gradient-to-r from-primary via-accent-glow to-primary bg-clip-text text-transparent">
-              Generate thousands.
-            </span>
+      <main className="relative flex flex-col items-center justify-center pt-24 pb-16 px-6 overflow-hidden">
+        {/* Subtle background dots/grid overlay */}
+        <div className="absolute inset-0 bg-grid opacity-30 pointer-events-none" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-radial-glow opacity-40 pointer-events-none" />
+
+        {/* Hero Top Text */}
+        <div className="relative z-10 w-full max-w-5xl mx-auto text-center">
+          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl tracking-widest text-primary font-bold uppercase mb-16">
+            DESIGN VISUALLY.
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            QuickCert is a visual editor for certificate templates. Drag in
-            placeholders, upload a CSV, and ship a ZIP of finished PNGs in
-            seconds.
+
+          {/* Center node graphic (abstract diagram) */}
+          <div className="flex items-center justify-center my-16 opacity-90 relative">
+             <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-3xl border-t border-border hidden md:block" />
+             <div className="relative z-10 bg-background/50 p-6 rounded-3xl backdrop-blur-sm border border-border shadow-sm">
+                <div className="bg-primary text-primary-foreground p-6 rounded-xl shadow-lg flex items-center justify-center w-24 h-24">
+                  <span className="font-display text-5xl font-bold">QC</span>
+                </div>
+             </div>
+             
+             {/* Fake nodes on the lines */}
+             <div className="hidden md:flex absolute w-full max-w-3xl justify-between px-12 pointer-events-none">
+                <div className="flex items-center gap-2 bg-background px-3 py-1 rounded-full border border-border text-xs font-mono font-medium text-muted-foreground"><div className="w-1.5 h-1.5 rounded-full bg-primary" /> Template</div>
+                <div className="flex items-center gap-2 bg-background px-3 py-1 rounded-full border border-border text-xs font-mono font-medium text-muted-foreground"><div className="w-1.5 h-1.5 rounded-full bg-primary" /> Render</div>
+             </div>
+          </div>
+
+          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl tracking-widest text-primary font-bold uppercase mt-16">
+            GENERATE INSTANTLY.
+          </h1>
+          
+          <p className="mt-8 text-muted-foreground max-w-lg mx-auto font-medium">
+            QuickCert brings automated visual editing to a new era of document generation. Pixel-perfect, fast, and scalable.
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center gap-3">
+          <div className="mt-8 flex justify-center">
             <Link
-              to="/templates"
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-[0_10px_40px_-12px_var(--primary)] transition hover:bg-primary/90"
+              to="/login"
+              className="inline-flex items-center gap-2 rounded-full bg-primary pl-4 pr-5 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition shadow-xl"
             >
-              Open dashboard <ArrowRight className="h-4 w-4" />
+              <span className="flex items-center justify-center bg-accent-glow text-white rounded-full p-1.5">
+                 <MoveRight className="w-4 h-4" />
+              </span>
+              Get Started
             </Link>
-            <a
-              href="#how"
-              className="inline-flex items-center rounded-md border border-border bg-surface/40 px-5 py-3 text-sm font-medium text-foreground transition hover:bg-surface"
-            >
-              How it works
-            </a>
           </div>
         </div>
-      </section>
 
-      {/* How */}
-      <section id="how" className="border-t border-border/60 bg-surface/30">
-        <div className="mx-auto max-w-6xl px-6 py-24">
-          <h2 className="font-display text-3xl font-semibold sm:text-4xl">
-            A three-step pipeline
-          </h2>
-          <p className="mt-3 max-w-xl text-muted-foreground">
-            Built around your FastAPI backend's normalized coordinate contract,
-            so the canvas preview matches generated PNGs exactly.
-          </p>
-
-          <div className="mt-12 grid gap-4 sm:grid-cols-3">
-            {[
-              {
-                icon: Sparkles,
-                title: "01 — Upload background",
-                desc: "Drop a PNG. The template dimensions are read on the server and locked in.",
-              },
-              {
-                icon: MousePointer2,
-                title: "02 — Place elements",
-                desc: "Static text, image overlays, and {placeholders} you fill at generation time.",
-              },
-              {
-                icon: FileSpreadsheet,
-                title: "03 — Generate",
-                desc: "One certificate from a form, or hundreds from a CSV/XLSX as a ZIP.",
-              },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div
-                key={title}
-                className="rounded-2xl border border-border/70 bg-card p-6 transition hover:border-primary/40"
-              >
-                <Icon className="h-5 w-5 text-primary" />
-                <h3 className="mt-4 font-display text-lg font-semibold">
-                  {title}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">{desc}</p>
+        {/* Floating Stats Band */}
+        <div className="relative z-10 mt-32 w-full max-w-5xl mx-auto flex flex-col md:flex-row bg-white rounded-[2rem] p-8 shadow-sm border border-border gap-12 md:gap-0">
+           
+           <div className="flex-1 flex flex-col gap-6 md:border-r border-border md:pr-12">
+              <div className="flex items-center gap-2 text-foreground font-bold tracking-tight">
+                 <Layers className="w-5 h-5" /> QuickCert
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              <div>
+                <div className="font-display text-5xl font-bold tracking-widest mb-2">10x</div>
+                <p className="text-sm font-medium text-muted-foreground">Faster generation time</p>
+              </div>
+           </div>
 
-      <footer className="border-t border-border/60 py-10">
-        <div className="mx-auto max-w-6xl px-6 text-sm text-muted-foreground">
-          QuickCert · Connected to{" "}
-          <code className="rounded bg-surface px-1.5 py-0.5 text-xs">
-            {import.meta.env.VITE_API_BASE ?? "http://localhost:8000"}
-          </code>
+           <div className="flex-1 flex flex-col gap-6 md:pl-12 md:border-r border-border md:pr-12">
+              <div className="flex items-center gap-2 text-foreground font-bold tracking-tight">
+                 <FileImage className="w-5 h-5" /> Export
+              </div>
+              <div>
+                <div className="font-display text-5xl font-bold tracking-widest mb-2">100%</div>
+                <p className="text-sm font-medium text-muted-foreground">Pixel-perfect accuracy</p>
+              </div>
+           </div>
+
+           <div className="flex-1 flex flex-col gap-4 justify-center md:pl-12">
+              <p className="text-sm font-medium text-foreground leading-relaxed">
+                 Connect your data. Our engine aligns, understands, and bulk-generates across large CSVs instantly.
+              </p>
+              <Link to="/login" className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-full self-start hover:bg-primary/90 transition">
+                 Sign up
+              </Link>
+           </div>
         </div>
-      </footer>
+
+        {/* Lower Asymmetric Section */}
+        <div className="relative z-10 mt-40 w-full max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-end gap-16 mb-20">
+           
+           <div className="max-w-md">
+             <h2 className="text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight">
+               Introducing Generation<br/>
+               <span className="text-muted-foreground">Our smartest engine capable of </span>
+               <span className="font-bold">scaling how documents output</span>
+             </h2>
+             <p className="mt-8 text-sm font-medium text-muted-foreground leading-relaxed max-w-sm">
+               A new category of visual editor built to understand and place dynamic variables in complex, real-world templates.
+             </p>
+             <Link to="/templates" className="mt-8 inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-full hover:bg-primary/90 transition">
+                <Sparkles className="w-4 h-4" /> Try Now
+             </Link>
+           </div>
+
+           {/* Abstract pixel art (simplified with CSS dots) */}
+           <div className="hidden lg:block absolute right-0 bottom-0 translate-x-1/4 -translate-y-1/4 w-[400px] h-[400px] opacity-20" 
+                style={{
+                  backgroundImage: "radial-gradient(circle, currentColor 2px, transparent 2px)",
+                  backgroundSize: "16px 16px",
+                  WebkitMaskImage: "radial-gradient(circle, black 20%, transparent 60%)"
+                }}
+           />
+
+           <div className="max-w-xs text-right relative z-10">
+             <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+               The first-of-its kind hybrid system that can understand and predict text bounds in large distributed batches.
+             </p>
+           </div>
+        </div>
+
+        <div className="mt-12 w-full max-w-5xl mx-auto border-t border-border pt-8 text-center text-xs font-medium text-muted-foreground">
+          QuickCert · Built for the modern web.
+        </div>
+      </main>
     </div>
   );
 }

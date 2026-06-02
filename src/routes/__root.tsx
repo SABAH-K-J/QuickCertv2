@@ -105,7 +105,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap",
       },
     ],
   }),
@@ -124,10 +124,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     // localStorage does not exist during SSR — bail out early on the server.
     if (typeof window === "undefined") return;
     
-    // Check if the current route is public (either exact match or starts with /verify/ or /auth_callback)
+    // Check if the current route is public (either exact match or starts with /verify/)
     const isPublic = PUBLIC_ROUTES.has(location.pathname) || 
-                     location.pathname.startsWith('/verify/') || 
-                     location.pathname.startsWith('/auth_callback');
+                     location.pathname.startsWith('/verify/');
                      
     if (!isLoggedIn() && !isPublic) {
       throw redirect({ to: "/login" });
@@ -141,7 +140,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>

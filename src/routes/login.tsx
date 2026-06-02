@@ -16,10 +16,9 @@ export const Route = createFileRoute("/login")({
     ],
   }),
   // Redirect to /templates if already logged in (client-side only — localStorage
-  // is not available during SSR).
   beforeLoad: () => {
     if (typeof window !== "undefined" && isLoggedIn()) {
-      throw { redirect: { to: "/templates" } };
+      throw { redirect: { to: "/dashboard" } };
     }
   },
   component: LoginPage,
@@ -52,7 +51,7 @@ function LoginPage() {
       const me = await api.getMe();
       setStoredUser(me);
       toast.success(`Welcome back, ${me.name}!`);
-      navigate({ to: "/templates" });
+      navigate({ to: "/dashboard" });
     } catch (err: any) {
       toast.error(err.message ?? "Login failed");
     } finally {
@@ -75,7 +74,7 @@ function LoginPage() {
       const me = await api.getMe();
       setStoredUser(me);
       toast.success(`Account created! Welcome, ${me.name}!`);
-      navigate({ to: "/templates" });
+      navigate({ to: "/dashboard" });
     } catch (err: any) {
       toast.error(err.message ?? "Registration failed");
     } finally {
@@ -92,7 +91,9 @@ function LoginPage() {
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-accent-glow shadow-[0_0_40px_-8px_var(--primary)]" />
+          <div className="bg-primary text-primary-foreground p-3 rounded-xl shadow-lg flex items-center justify-center w-14 h-14">
+            <span className="font-display text-2xl font-bold">QC</span>
+          </div>
           <h1 className="font-display text-3xl font-bold tracking-tight">QuickCert</h1>
           <p className="text-sm text-muted-foreground">
             {tab === "login" ? "Sign in to your account" : "Create a new account"}
@@ -227,27 +228,6 @@ function LoginPage() {
               </form>
             )}
 
-            <div className="relative mt-8">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="mt-6 w-full font-medium"
-              onClick={() => {
-                window.location.href = `${API_BASE}/auth/google`;
-              }}
-            >
-              Continue with Google
-            </Button>
           </div>
         </div>
 
