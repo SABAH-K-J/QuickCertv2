@@ -6,6 +6,7 @@ import { Header } from "@/components/site/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Download, Sparkles, FileSpreadsheet, ArrowLeft } from "lucide-react";
@@ -42,6 +43,7 @@ function GeneratePage() {
   }, [elements]);
 
   const [values, setValues] = useState<Record<string, string>>({});
+  const [includeQr, setIncludeQr] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [bulkFile, setBulkFile] = useState<File | null>(null);
@@ -50,7 +52,7 @@ function GeneratePage() {
   async function generateOne() {
     setLoading(true);
     try {
-      const blob = await api.generateOne(templateId, values);
+      const blob = await api.generateOne(templateId, values, includeQr);
       const url = URL.createObjectURL(blob);
       setPreview(url);
     } catch (e: any) {
@@ -137,6 +139,18 @@ function GeneratePage() {
                     ))}
                   </div>
                 )}
+
+                <div className="mt-6 flex items-center space-x-2">
+                  <Checkbox 
+                    id="includeQr" 
+                    checked={includeQr}
+                    onCheckedChange={(checked) => setIncludeQr(!!checked)}
+                  />
+                  <Label htmlFor="includeQr" className="font-medium cursor-pointer">
+                    Include Verification QR Code
+                  </Label>
+                </div>
+
                 <Button
                   onClick={generateOne}
                   disabled={loading}

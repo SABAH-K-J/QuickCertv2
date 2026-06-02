@@ -207,11 +207,12 @@ export const api = {
     }).then(handle<TemplateElementResponse>),
 
   // ── Generation (JWT required) ────────────────────────────────────────────
-  generateOne: async (tid: number, data: Record<string, string>) => {
+  generateOne: async (tid: number, data: Record<string, string>, includeQr: boolean = false) => {
+    const body = { ...data, include_qr: includeQr };
     const res = await fetch(`${API_BASE}/templates/${tid}/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...authHeader() },
-      body: JSON.stringify(data),
+      body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error(`Generate failed: ${res.status}`);
     return res.blob();

@@ -131,6 +131,25 @@ function EditorInner({ template }: { template: TemplateResponse }) {
       // Load elements
       try {
         const elements = await api.listElements(template.id);
+
+        // Preload Google Fonts if any text elements use them
+        const fontsToLoad = new Set<string>();
+        for (const el of elements) {
+          if (el.element_type === "text" && el.font_family && el.font_family !== "Arial" && el.font_family !== "Times New Roman") {
+            fontsToLoad.add(el.font_family);
+          }
+        }
+        for (const f of fontsToLoad) {
+          if (!document.querySelector(`link[href*="family=${f.replace(/ /g, "+")}"]`)) {
+            const link = document.createElement("link");
+            link.href = `https://fonts.googleapis.com/css2?family=${f.replace(/ /g, "+")}&display=swap`;
+            link.rel = "stylesheet";
+            document.head.appendChild(link);
+          }
+        }
+        // Wait for fonts to be ready so Fabric can measure text correctly
+        await Promise.all(Array.from(fontsToLoad).map(f => document.fonts.load(`16px "${f}"`).catch(e => console.error(e))));
+
         for (const el of elements) {
           if (el.element_type === "text") {
             const text = new fabric.IText(el.content ?? "", {
@@ -506,12 +525,16 @@ function ToolButton({
 // ── Properties panel ──────────────────────────────────────────────────────
 const FONTS = [
   "Arial",
-  "Helvetica",
   "Times New Roman",
-  "Georgia",
-  "Courier New",
-  "Verdana",
-  "Trebuchet MS",
+  "Roboto",
+  "Open Sans",
+  "Lato",
+  "Montserrat",
+  "Playfair Display",
+  "Merriweather",
+  "Nunito",
+  "Poppins",
+  "Oswald",
 ];
 
 function PropertiesPanel({
@@ -578,16 +601,29 @@ function PropertiesPanel({
             <Label>Font family</Label>
             <Select
               value={activeObject.fontFamily ?? "Arial"}
-              onValueChange={(v) =>
-                update({ fontFamily: v }, { font_family: v })
-              }
+              onValueChange={async (v) => {
+                if (v !== "Arial" && v !== "Times New Roman") {
+                  if (!document.querySelector(`link[href*="family=${v.replace(/ /g, "+")}"]`)) {
+                    const link = document.createElement("link");
+                    link.href = `https://fonts.googleapis.com/css2?family=${v.replace(/ /g, "+")}&display=swap`;
+                    link.rel = "stylesheet";
+                    document.head.appendChild(link);
+                  }
+                  try {
+                    await document.fonts.load(`16px "${v}"`);
+                  } catch (e) {
+                    console.error("Font load failed:", e);
+                  }
+                }
+                update({ fontFamily: v }, { font_family: v });
+              }}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {FONTS.map((f) => (
-                  <SelectItem key={f} value={f}>
+                  <SelectItem key={f} value={f} style={{ fontFamily: f }}>
                     {f}
                   </SelectItem>
                 ))}
