@@ -1,1 +1,14 @@
-{"name":"","short_name":"","icons":[{"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#ffffff","background_color":"#ffffff","display":"standalone"}
+{
+  "name": "QuickCert",
+  "short_name": "QuickCert",
+  "description": "Design certificate templates, fill placeholders from a spreadsheet, and download one PNG per recipient.",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "theme_color": "#12251D",
+  "background_color": "#E7EBE3",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/"
+}

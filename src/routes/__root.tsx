@@ -16,7 +16,15 @@ import { Toaster } from "@/components/ui/sonner";
 import { isLoggedIn } from "@/lib/auth";
 
 /** Routes that do NOT require authentication. */
-const PUBLIC_ROUTES = new Set(["/", "/login"]);
+const PUBLIC_ROUTES = new Set([
+  "/",
+  "/login",
+  "/how-it-works",
+  "/about",
+  "/privacy",
+  "/terms",
+  "/verify",
+]);
 
 function NotFoundComponent() {
   return (
@@ -93,24 +101,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
     ],
     links: [
-      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
       { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/site.webmanifest" },
       { rel: "stylesheet", href: appCss },
-      {
-        rel: "preconnect",
-        href: "https://fonts.googleapis.com",
-      },
-      {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-        crossOrigin: "anonymous",
-      },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap",
-      },
     ],
   }),
   /**
@@ -127,11 +123,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   beforeLoad: ({ location }) => {
     // localStorage does not exist during SSR — bail out early on the server.
     if (typeof window === "undefined") return;
-    
+
     // Check if the current route is public (either exact match or starts with /verify/)
-    const isPublic = PUBLIC_ROUTES.has(location.pathname) || 
-                     location.pathname.startsWith('/verify/');
-                     
+    const isPublic =
+      PUBLIC_ROUTES.has(location.pathname) || location.pathname.startsWith("/verify/");
+
     if (!isLoggedIn() && !isPublic) {
       throw redirect({ to: "/login" });
     }
