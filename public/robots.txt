@@ -1,6 +1,8 @@
 User-agent: *
 Allow: /
 
+Sitemap: https://quick-certv2.vercel.app/sitemap.xml
+
 Disallow: /dashboard
 Disallow: /templates
 Disallow: /history
