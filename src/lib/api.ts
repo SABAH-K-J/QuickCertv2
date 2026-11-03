@@ -10,8 +10,7 @@
  */
 import { getToken, logout } from "./auth";
 
-export const API_BASE: string =
-  (import.meta as any).env?.VITE_API_BASE ?? "http://localhost:8000";
+export const API_BASE: string = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 
 export interface TemplateResponse {
   id: number;
@@ -78,6 +77,22 @@ function authHeader(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+/** Extract a FastAPI error message from a failed binary response. */
+async function binaryError(res: Response, fallback: string): Promise<Error> {
+  const text = await res.text().catch(() => "");
+  try {
+    const json = JSON.parse(text);
+    const detail = json?.detail;
+    if (typeof detail === "string") return new Error(detail);
+    if (Array.isArray(detail)) {
+      return new Error(detail.map((d: { msg?: string }) => d.msg ?? "Invalid input").join(", "));
+    }
+  } catch {
+    // Not JSON — fall through to the plain-text message.
+  }
+  return new Error(text.trim() || `${fallback} (${res.status})`);
+}
+
 async function handle<T>(res: Response): Promise<T> {
   // Global 401 interceptor — token expired or invalid.
   // Log out and hard-redirect so the user lands on the login page
@@ -97,8 +112,9 @@ async function handle<T>(res: Response): Promise<T> {
       const json = JSON.parse(text);
       const detail = json?.detail;
       if (typeof detail === "string") throw new Error(detail);
-      if (Array.isArray(detail)) throw new Error(detail.map((d: any) => d.msg).join(", "));
-    } catch (parseErr: any) {
+      if (Array.isArray(detail))
+        throw new Error(detail.map((d: { msg?: string }) => d.msg ?? "Invalid input").join(", "));
+    } catch (parseErr: unknown) {
       if (parseErr instanceof SyntaxError) {
         throw new Error(`API ${res.status}: ${text || res.statusText}`);
       }
@@ -182,11 +198,7 @@ export const api = {
       body: JSON.stringify(el),
     }).then(handle<TemplateElementResponse>),
 
-  updateElement: (
-    tid: number,
-    eid: number,
-    patch: Partial<TemplateElementResponse>,
-  ) =>
+  updateElement: (tid: number, eid: number, patch: Partial<TemplateElementResponse>) =>
     fetch(`${API_BASE}/templates/${tid}/elements/${eid}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", ...authHeader() },
@@ -214,7 +226,7 @@ export const api = {
       headers: { "Content-Type": "application/json", ...authHeader() },
       body: JSON.stringify(body),
     });
-    if (!res.ok) throw new Error(`Generate failed: ${res.status}`);
+    if (!res.ok) throw await binaryError(res, "Generate failed");
     return res.blob();
   },
 
@@ -226,7 +238,7 @@ export const api = {
       headers: { ...authHeader() },
       body: form,
     });
-    if (!res.ok) throw new Error(`Bulk generate failed: ${res.status}`);
+    if (!res.ok) throw await binaryError(res, "Bulk generate failed");
     return res.blob();
   },
 

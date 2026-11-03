@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /dashboard
+Disallow: /templates
+Disallow: /history
+Disallow: /editor/
+Disallow: /generate/
+
